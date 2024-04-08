@@ -1,4 +1,4 @@
-package itcr.tarea3poo.Logica;
+package itcr.tarea3poo;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -77,13 +77,12 @@ public class OrdenCompra {
         for (LineaOrdenCompra linea : lineas) {
             resultado += linea.toString() + "\n";
         }
-        resultado += "Costo sin impuestos: " + calcularCosto() + "\n";
-        resultado += "Impuestos: " + calcularImpuesto() + "\n";
-        resultado += "Total a pagar: " + calcularTotal() + "\n";
+        resultado += "Costo sin impuestos: $" + calcularCosto() + "\n";
+        resultado += "Impuestos: $" + calcularImpuesto() + "\n";
+        resultado += "Total a pagar: $" + calcularTotal() + "\n";
         return resultado;
     }
 }
-
 
 
 
