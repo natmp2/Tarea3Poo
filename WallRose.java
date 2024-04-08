@@ -1,10 +1,10 @@
-package itcr.tarea3poo.Control;
+package itcr.tarea3poo;
 // diamante relleno composicion, diamante hueco agregacion no se muy bien que hace cada uno pero diay
-import itcr.tarea3poo.Logica.Clientes;
-import itcr.tarea3poo.Logica.OrdenCompra;
-import itcr.tarea3poo.Logica.Productos;
-import itcr.tarea3poo.Logica.EstadoCompra;
-import itcr.tarea3poo.Logica.LineaOrdenCompra;
+import itcr.tarea3poo.Clientes;
+import itcr.tarea3poo.OrdenCompra;
+import itcr.tarea3poo.Productos;
+import itcr.tarea3poo.EstadoCompra;
+import itcr.tarea3poo.LineaOrdenCompra;
 import java.util.Scanner;
 import java.util.ArrayList;
 
@@ -37,7 +37,7 @@ public class WallRose {
         throw new Exception("Codigo de producto no encontrado.");
     }
 
-    private OrdenCompra obtenerOrdenCompra(int numero) throws Exception{
+    private OrdenCompra obtenerOrdenCompra(int numero) throws Exception{ // ya genera la orden con el num de cliente
         for (OrdenCompra orden : listaOrdenes){
             if (orden.getNumero() == numero){
                 return orden;
@@ -46,20 +46,23 @@ public class WallRose {
         throw new Exception("Numero de orden no encontrado.");
     }
 
+    public void verListaClientes() {
+        for (Clientes cliente : listaClientes) { // para que imprima todo
+            System.out.println(cliente);
+        }
+    }
 
+    public void verListaProductos() {
+        for (Productos producto : listaProductos) { // para que imprima todo
+            System.out.println(producto);
+        }
+    }
 
-    public ArrayList<Clientes> verListaClientes() {
-            return listaClientes;
+    public void verListaOrdenes() {
+        for (OrdenCompra orden : listaOrdenes) { // para que imprima todo
+            System.out.println(orden);
+        }
     }
-    
-    public ArrayList<OrdenCompra> verListaOrdenes() {
-        return listaOrdenes;
-    }
-    
-    public ArrayList<Productos> verListaProductos() {
-        return listaProductos;
-    }
-    
     
     public String verProducto(int codigoProducto) throws Exception{
         for (Productos producto : listaProductos){
@@ -116,42 +119,35 @@ public class WallRose {
     }
 
 
-    public int crearOrden(int numeroOrden) throws Exception { //no tuve que usar el paramentro de numeroOrden no supe adonde ponerlo
-        Scanner scanner = new Scanner(System.in);
-        System.out.println("Lista de clientes:\n");
-        for (Clientes cliente : listaClientes){
-            System.out.println(cliente.toString());
-        }
-        System.out.println("Por favor escriba el numero de cliente al que le desea crear la orden:");
-        int numeroCliente = scanner.nextInt();
-        for (Clientes cliente : listaClientes){
-            if (cliente.getNumero() == numeroCliente){
-                OrdenCompra nuevaOrden = new OrdenCompra(cliente);
-                listaOrdenes.add(nuevaOrden);
-                System.out.println("se ha creado la orden corrrectamente, el numero de orden seria: " + nuevaOrden.getNumero());
-                return nuevaOrden.getNumero();
-        }
-    }
-    throw new Exception("numero de cliente no encontrado.");
+    public int crearOrden(int numeroCliente) throws Exception {
+        Clientes cliente = obtenerCliente(numeroCliente);
+        OrdenCompra nuevaOrden = new OrdenCompra(cliente);
+        listaOrdenes.add(nuevaOrden);
+        return nuevaOrden.getNumero();
     }
 
 
     public void agregarLineaOrden(int numeroOrden, int codigoProducto, float cantidad) throws Exception {
-        OrdenCompra orden = obtenerOrdenCompra(numeroOrden); //ya dentro de los metodos obtener se ejecutan las excepciones
-        Productos producto = obtenerProductos(codigoProducto);
-        System.out.println("Las ordenes registradas a ese numero son:");
-        for (OrdenCompra ordenesTotales : listaOrdenes){
-            System.out.println("orden numero: " + ordenesTotales.getNumero() + "\t" +  ordenesTotales.getLineas()); ///aqui no se muy bien como devuelve esto habria que probarlo 
-        }
-        
-        for (Productos nuevoProducto : listaProductos){
-            if (nuevoProducto.getCodigo() == codigoProducto){
-                orden.agregarLinea(cantidad, producto);
-                orden.setEstado(EstadoCompra.PENDIENTE);
-                producto.setExistencias(producto.getExistencias() - cantidad); //trainwreck medio feo pero basicamente le resta al total de existencias la cantidad que agregó a la orden
+        OrdenCompra orden = obtenerOrdenCompra(numeroOrden);
+        Productos producto = null;
+        for (Productos p : listaProductos) {
+            if (p.getCodigo() == codigoProducto) {
+                producto = p;
+                break;
             }
-            throw new Exception("no existe un producto con ese codigo.");
         }
+
+        if (producto == null) {
+            throw new Exception("No existe un producto con ese código.");
+        }
+
+        if (producto.getExistencias() < cantidad) {
+            throw new Exception("No hay suficientes existencias del producto.");
+        }
+
+        orden.agregarLinea(cantidad, producto);
+        orden.setEstado(EstadoCompra.PENDIENTE);
+        producto.setExistencias(producto.getExistencias() - cantidad);
     }
 
 
@@ -181,9 +177,17 @@ public class WallRose {
             throw new Exception("No se encontró el número de orden.");
         }
     }
-        
-        
-
+    
+    public void completarOrden(int numeroOrden) throws Exception {
+        OrdenCompra orden = obtenerOrdenCompra(numeroOrden);
+        if (orden != null) {
+            orden.setEstado(EstadoCompra.COMPLETA);
+            System.out.println("La orden número " + numeroOrden + " ha sido completada.");
+        } else {
+            throw new Exception("No se encontró el número de orden.");
+        }
+    }
+       
     public void agregarExistenciasProducto(int codigoProducto, float nuevasExistencias) throws Exception {
         for (Productos producto : listaProductos){
             if (producto.getCodigo() == codigoProducto){
